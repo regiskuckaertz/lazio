@@ -2,14 +2,14 @@ package com.adamnfish.lazio
 
 import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.handlers.AsyncHandler
-import zio.{IO, Promise}
+import zio.{IO, Promise, Blocking}
 
 
 object ZioAwsSdk {
   def wrapSdk
       [R <: AmazonWebServiceRequest, T, Client]
       (client: Client)
-      (sdkMethod: Client => ((R, AsyncHandler[R, T]) => java.util.concurrent.Future[T])): (R => IO[Exception, T]) = { req =>
+      (sdkMethod: Client => ((R, AsyncHandler[R, T]) => java.util.concurrent.Future[T])): (R => ZIO[Blocking, Exception, T]) = { req =>
     for {
       promise <- Promise.make[Exception, T]
       _ = sdkMethod(client)(req, new AsyncHandler[R, T] {
